@@ -1,18 +1,23 @@
 <?php
-	header('Content-type: text/plain;');
+        header('Content-type: text/plain;');
+        
 	$arch = (isset($_GET['arch'])) ? $_GET['arch'] : 'x86_64';
-	$hostname = (isset($_GET['hostname'])) ? $_GET['hostname'] : 'dev-centos';
+        $hostname = (isset($_GET['hostname'])) ? $_GET['hostname'] : 'dev-centos';
+        $autopart = (isset($_GET['autopart'])) ? $_GET['autopart'] : false;
+        $desktop = (isset($_GET['desktop'])) ? $_GET['desktop'] : 0;
 	
-	$mirror = 'http://ds04-deploy/mirrors';
+        $mirror = 'http://192.168.0.10/mirrors';
 ?>
 install
 
-url --url=<?=$mirror?>/centos/6/os/<?=$arch?> 
+# TODO: change this to point to a mirror on the net or your local LAN
+url --url=<?=$mirror?>/centos/6/os/<?=$arch?>
 
 lang en_US.UTF-8
 keyboard us
 
-network --onboot yes --device eth0 --bootproto dhcp --noipv6 --hostname <?=$hostname?> 
+# TODO: change the hostname
+network --onboot yes --device eth0 --bootproto dhcp --noipv6 --hostname <?=$hostname?>
 
 # Don't change the password here, but make note of it and change it after the OS is installed
 rootpw r00tme
@@ -20,16 +25,15 @@ rootpw r00tme
 firewall --disabled
 authconfig --enableshadow --passalgo=sha512
 
-<?php if (isset($_GET['desktop']) && $_GET['desktop']): ?>
-firstboot --enable
-<?php endif; ?>
+#firstboot --enable
 
 selinux --enforcing
 timezone --utc America/Chicago
 
-bootloader --location=mbr --driveorder=sda --append="crashkernel=auto rhgb quiet"
+<?php if ($autopart): ?>
+bootloader --location=mbr --driveorder=<?=$autopart?> --append="crashkernel=auto rhgb quiet"
 zerombr
-clearpart --all --initlabel --drives=sda
+clearpart --all --initlabel --drives=<?=$autopart?>
 
 part /boot --fstype=ext4 --size=500
 part pv.008002 --grow --size=1
@@ -37,6 +41,7 @@ part pv.008002 --grow --size=1
 volgroup vg_system --pesize=4096 pv.008002
 logvol / --fstype=ext4 --name=lv_root --vgname=vg_system --grow --size=1024 --maxsize=51200
 logvol swap --name=lv_swap --vgname=vg_system --size=1024
+<?php endif; ?>
 
 reboot
 
@@ -45,7 +50,7 @@ reboot
 @core
 @server-policy
 
-<?php if (isset($_GET['desktop']) && $_GET['desktop']): ?>
+<?php if ($desktop): ?>
 @base
 @debugging
 @basic-desktop
@@ -99,5 +104,10 @@ cp .vimrc /etc/skel/
 
 echo "PS1='[\[\e[01;31m\]\u@\h \w\[\e[0m\]]\$ '" >> /root/.bashrc
 echo "PS1='[\u@\h \w]\$ '" >> /etc/skel/.bashrc
+
+<?php if ($desktop): ?>
+useradd andrew -c'Andrew Wells' -m
+echo insecure | passwd andrew --stdin
+<?php endif; ?>
 
 %end
