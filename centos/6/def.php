@@ -1,22 +1,34 @@
 <?php
-        header('Content-type: text/plain;');
-        
+	header('Content-type: text/plain;');
+		
 	$arch = (isset($_GET['arch'])) ? $_GET['arch'] : 'x86_64';
-        $hostname = (isset($_GET['hostname'])) ? $_GET['hostname'] : 'dev-centos';
-        $autopart = (isset($_GET['autopart'])) ? $_GET['autopart'] : false;
-        $desktop = (isset($_GET['desktop'])) ? $_GET['desktop'] : 0;
-	
-        $mirror = 'http://192.168.0.10/mirrors';
+	$hostname = (isset($_GET['hostname'])) ? $_GET['hostname'] : 'dev-centos';
+	$autopart = (isset($_GET['autopart'])) ? $_GET['autopart'] : false;
+	$desktop = (isset($_GET['desktop'])) ? $_GET['desktop'] : 0;
+
+	$mirror = 'http://s10-deploy/mirrors';
 ?>
+#####################################################################
+# There are a few settings that are expected to be set at runtime.
+# 
+# arch - i386 or x86_64
+# hostname - desired hostname of the new machine
+# autopart - name of the disk to auto-partition, or leave blank to be prompted for the partitioner.  Eg: sda, xda, or false
+# desktop - install desktop env.  true/false
+# 
+# Call the script like this: http://<?=$_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']?>?arch=i386&desktop=1&hostname=dev-centos 
+#
+# Call the Kickstart file and play with some different options, and review the output.  
+# If you like what you see, add the URL to a new install disk or PXE boot menu.
+#####################################################################
+
 install
 
-# TODO: change this to point to a mirror on the net or your local LAN
 url --url=<?=$mirror?>/centos/6/os/<?=$arch?>
 
 lang en_US.UTF-8
 keyboard us
 
-# TODO: change the hostname
 network --onboot yes --device eth0 --bootproto dhcp --noipv6 --hostname <?=$hostname?>
 
 # Don't change the password here, but make note of it and change it after the OS is installed
@@ -25,7 +37,8 @@ rootpw r00tme
 firewall --disabled
 authconfig --enableshadow --passalgo=sha512
 
-#firstboot --enable
+# We are manually creating a user at the end, no reason for the first boot wizard
+firstboot --disable
 
 selinux --enforcing
 timezone --utc America/Chicago
