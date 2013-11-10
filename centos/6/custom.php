@@ -40,4 +40,6 @@ cp .vimrc /etc/skel/
 echo "PS1='[\[\e[01;31m\]\u@\h \w\[\e[0m\]]\$ '" >> /root/.bashrc
 echo "PS1='[\u@\h \w]\$ '" >> /etc/skel/.bashrc
 
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+
 %end

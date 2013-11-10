@@ -123,4 +123,6 @@ useradd andrew -c'Andrew Wells' -m
 echo insecure | passwd andrew --stdin
 <?php endif; ?>
 
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
+
 %end
