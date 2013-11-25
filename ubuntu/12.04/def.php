@@ -1,6 +1,21 @@
 <?php
 	header('Content-type: text/plain;');
+		
+	$autopart = (isset($_GET['autopart'])) ? $_GET['autopart'] : false;
+	$desktop = (isset($_GET['desktop'])) ? $_GET['desktop'] : 0;
 ?>
+#####################################################################
+# There are a few settings that are expected to be set at runtime.
+# 
+# autopart - name of the disk to auto-partition, or leave blank to be prompted for the partitioner.  Eg: sda, vda, or false
+# desktop - install desktop env.  true/false
+# 
+# Call the script like this: http://<?=$_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']?>?arch=i386&desktop=1 
+#
+# Call the Kickstart file and play with some different options, and review the output.  
+# If you like what you see, add the URL to a new install disk or PXE boot menu.
+#####################################################################
+
 d-i debian-installer/locale string en_US
 
 d-i debian-installer/language string en
@@ -22,7 +37,9 @@ d-i time/zone string US/Central
 d-i clock-setup/ntp boolean true
 d-i clock-setup/ntp-server string 1.north-america.pool.ntp.org
 
-d-i partman-auto/disk string /dev/sda
+<?php if ($autopart): ?>
+d-i partman-auto/disk string /dev/<?=$autopart?>
+
 d-i partman-auto/method string lvm
 d-i partman-lvm/device_remove_lvm boolean true
 d-i partman-lvm/confirm boolean true
@@ -36,6 +53,7 @@ d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 d-i partman/confirm_nooverwrite boolean true
 d-i partman-lvm/confirm_nooverwrite boolean true
+<?php endif; ?>
 
 d-i passwd/root-login boolean true
 d-i passwd/root-password password r00tme
@@ -64,7 +82,11 @@ d-i apt-setup/local0/comment string Puppetlabs Repo
 d-i apt-setup/local0/source boolean true
 d-i apt-setup/local0/key string http://apt.puppetlabs.com/pubkey.gpg
 
+<?php if ($desktop): ?>
 tasksel tasksel/first multiselect xubuntu-desktop
+<?php else: ?>
+tasksel tasksel/first multiselect ubuntu-server
+<?php endif; ?>
 
 d-i pkgsel/include string ssh openssh-server htop iftop iotop curl puppet
 

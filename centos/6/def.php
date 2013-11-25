@@ -13,7 +13,7 @@
 # 
 # arch - i386 or x86_64
 # hostname - desired hostname of the new machine
-# autopart - name of the disk to auto-partition, or leave blank to be prompted for the partitioner.  Eg: sda, xda, or false
+# autopart - name of the disk to auto-partition, or leave blank to be prompted for the partitioner.  Eg: sda, vda, or false
 # desktop - install desktop env.  true/false
 # 
 # Call the script like this: http://<?=$_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']?>?arch=i386&desktop=1&hostname=dev-centos 
